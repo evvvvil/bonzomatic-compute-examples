@@ -26,13 +26,13 @@ float t;                    //Time global variable
 
 //READ / WRITE COMPUTE TEXTURE FUNCTIONS
 void Add(ivec2 u, vec3 c){//add pixel to compute texture
-  ivec3 q = ivec3(c*1000);//floatToInt trick to keep sign
+  ivec3 q = ivec3(c*1000);//squish float into int, we use this trick to keep it additive as floatToInt wouldn't work additively
   imageAtomicAdd(computeTex[0], u,q.x);
   imageAtomicAdd(computeTex[1], u,q.y);
   imageAtomicAdd(computeTex[2], u,q.z);
 }
 vec3 Read(ivec2 u){       //read pixel from compute texture
-  return 0.001*vec3(      //floatToInt trick to keep sign
+  return 0.001*vec3(      //unsquish int to float
     imageLoad(computeTexBack[0],u).x,
     imageLoad(computeTexBack[1],u).x,
     imageLoad(computeTexBack[2],u).x
