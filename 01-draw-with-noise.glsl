@@ -99,9 +99,9 @@ void main(void){
   //Recalculate uv for vignette: This is only done to simplify making a vignette background by using uv in range -.5,.5. It's the original uv calc you get in bonzomatic start tunnel
   uv = vec2(gl_FragCoord.x / v2Resolution.x, gl_FragCoord.y / v2Resolution.y); //Default uv calc from Bonzo, used for vignette
   uv-=.5;                                                                      //Default uv calc from Bonzo, used for vignette
-	uv/=vec2(v2Resolution.y / v2Resolution.x, 1);                                //Default uv calc from Bonzo, used for vignette
+  uv/=vec2(v2Resolution.y / v2Resolution.x, 1);                                //Default uv calc from Bonzo, used for vignette
 
   vec3 col = vec3(.4)-length(uv)*.5;                                           //Background colour and vignette
   col+=pow(s,vec3(.45));                                                       //Particle colour and gamma correction
-	out_color = vec4(col,0);                                                     //Return final colour for pixel
+  out_color = vec4(col,0);                                                     //Return final colour for pixel
 }
