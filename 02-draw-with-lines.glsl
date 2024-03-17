@@ -69,7 +69,7 @@ void main(void){
   seed+=hashi(uint(UV.x))+hashi(uint(UV.y)*125);  //More hash
   vec2 uv = vec2(gl_FragCoord.x / v2Resolution.x, gl_FragCoord.y / v2Resolution.y); //Default uv calc from Bonzo
   //uv-=.5;                                                                         //We want uv range 0->1 not -.5->.5 so things start at zero
-	uv/=vec2(v2Resolution.y / v2Resolution.x, 1);                                     //uv now hold uv coordinates in 0->1 range
+  uv/=vec2(v2Resolution.y / v2Resolution.x, 1);                                     //uv now hold uv coordinates in 0->1 range
 
   //PLEASE NOTE: we have two uv coordinates variables: uv and UV
   //uv is from 0 -> 1
@@ -103,9 +103,9 @@ void main(void){
   //Recalculate uv for vignette: This is only done to simplify making a vignette background by using uv in range -.5,.5. It's the original uv calc you get in bonzomatic start tunnel
   uv = vec2(gl_FragCoord.x / v2Resolution.x, gl_FragCoord.y / v2Resolution.y); //Default uv calc from Bonzo, used for vignette
   uv-=.5;                                                                      //Default uv calc from Bonzo, used for vignette
-	uv/=vec2(v2Resolution.y / v2Resolution.x, 1);                                //Default uv calc from Bonzo, used for vignette
+  uv/=vec2(v2Resolution.y / v2Resolution.x, 1);                                //Default uv calc from Bonzo, used for vignette
 
   vec3 col = vec3(.2,.35,.5)-length(uv)*.5;                                    //Background colour and vignette
   col+=pow(s,vec3(.45));                                                       //Particle colour and gamma correction
-	out_color = vec4(col,0);                                                     //Return final colour for pixel
+  out_color = vec4(col,0);                                                     //Return final colour for pixel
 }

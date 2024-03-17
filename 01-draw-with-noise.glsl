@@ -69,7 +69,7 @@ void main(void){
   seed+=hashi(uint(UV.x))+hashi(uint(UV.y)*125);  //More hash
   vec2 uv = vec2(gl_FragCoord.x / v2Resolution.x, gl_FragCoord.y / v2Resolution.y); //Default uv calc from Bonzo
   //uv-=.5;                                                                         //We want uv range 0->1 not -.5->.5 so things start at zero
-	uv/=vec2(v2Resolution.y / v2Resolution.x, 1);                                     //uv now hold uv coordinates in 0->1 range
+  uv/=vec2(v2Resolution.y / v2Resolution.x, 1);                                     //uv now hold uv coordinates in 0->1 range
 
   //PLEASE NOTE: we have two uv coordinates variables: uv and UV
   //uv is from 0 -> 1
