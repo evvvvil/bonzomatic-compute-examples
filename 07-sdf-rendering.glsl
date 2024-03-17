@@ -71,8 +71,8 @@ float map(vec3 p){
 }
 
 void main(void){
-	t=fGlobalTime*.1;                               //Set global time variable
-	seed=0;                                         //Init hash
+  t=fGlobalTime*.1;                               //Set global time variable
+  seed=0;                                         //Init hash
   seed+=hashi(uint(UV.x))+hashi(uint(UV.y)*125);  //More hash
   vec2 uv = vec2(gl_FragCoord.x / v2Resolution.x, gl_FragCoord.y / v2Resolution.y); //Default uv calc from Bonzo
   //uv-=.5;                                                                         //We want uv range 0->1 not -.5->.5 so things start at zero
