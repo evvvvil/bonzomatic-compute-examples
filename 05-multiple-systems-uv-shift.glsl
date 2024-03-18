@@ -46,6 +46,12 @@ float hash_f(){return float(seed=hashi(seed))/float(0xffffffffU);}              
 vec3 hash_v3(){return vec3(hash_f(),hash_f(),hash_f());}                                // hash vec3
 vec2 hash_v2(){return vec2(hash_f(),hash_f());}                                         // hash vec2
 
+//HASH DISC FUNCTION: Use this function to make a disc filled with random particles
+vec2 hash_disc(){ vec2 r=hash_v2();return vec2(cos(r.x*6.28),sin(r.x*6.28))*sqrt(r.y);}
+
+//CLASSIC ROTATE2D FUNCTION: Rotate using this function
+mat2 rotate2D(float r){return mat2(cos(r),-sin(r),sin(r),cos(r));}
+
 //POINT PROJECTION FUNCTION: Project points in 3d, use classic raymarching camera or some transform on p
 ivec2 proj_point(vec3 p,vec3 cameraPostion,mat3 cameraDirection){
   // Classic camera example
@@ -78,31 +84,45 @@ void main(void){
 
   // Classic camera example: remove this if not using camera and just using transforms in proj_point function
   vec3 cameraTarget=vec3(0,0,0),                                //Camera target
-  cameraPosition=vec3(cos(t)*20,3,sin(t)*20),                   //Camera position
+  cameraPosition=vec3(cos(t)*30,3,sin(t)*30),                   //Camera position
   cameraForward=normalize(cameraTarget-cameraPosition),         //Camera forward
   cameraLeft=normalize(cross(cameraForward,vec3(0,1,0))),       //Camera left
   cameraTop=normalize(cross(cameraLeft,cameraForward));         //Camera top
   mat3 cameraDirection=mat3(cameraLeft,cameraTop,cameraForward);//Camera direction matrix
 
   if(UV.x<400){     //Amount / Density of particles
-    vec3 p=hash_v3()*vec3(.1,.1,20); //Extrude using pure noise by scalling hash, 20 is used to extrude along z, xy
-    p.z-=10;                         //Move tube in middle, 10 is half of scale of noise in
-    float radius=1.;                 //Tube radius with bulge deform using cosinus of p.z. You could use UV.x or uv.x as well, but p.z is based on UV.x and it's shifted at 0,0,0
+    vec3 p=vec3(0); //Set p as 0,0,0 with no hash to avoid noise and keep sharp line look
+    float tubeLength=0.1;
+    p.z=UV.x*tubeLength; //We extrude system along z using UV rather than uv so that the calculation to move in middle is more simple
+    p.z-=200*tubeLength; //Move tube in middle, 200 is simply half of the amount of particles. Yes if you change 400 on line 93 you should change 200 to half of it
+    float radius=1.+cos(p.z*.5)*.3;  //Tube radius with bulge deform using cosinus of p.z. You could use UV.x or uv.x as well, but p.z is based on UV.x and it's shifted at 0,0,0
     p.xy+=vec2(cos(uv.y*6.283)*radius,sin(uv.y*6.283)*radius);  //Push particles along a circle on XY to create tube. Here we using uv.y rather than UV.y as its range is 0->1 so it's simpler to make a full circle by mutiplying by 2*PI
-
-    //Spherical attractor code:
-    vec3 attrPosition=vec3(0,sin(t*5)*2.,sin(t*5)*5)-p; //Attractor position
-    float attrAmount=3;                                 //Attractor amount
-    float attrRadius=8;                                 //Attractor radius
-		float attrForce=length(attrPosition)/attrRadius;    //Attractor force
-		attrForce=clamp(1-attrForce,0.,1.);                 //More attractor foce shenanigans
-		attrForce=pow(attrForce, 8);                        //Pack ellipis into sphere more using 8, play with that number
-		p-=attrPosition*attrForce*attrAmount;               //Apply spherical attractor force to points position
-
     ivec2 q=proj_point(p,cameraPosition,cameraDirection);       //Project point in 3d using camera or not, see function itself
-    //If point is NOT behind camera, draw point with gradient along p.z. Removing if(q.x>0) will make it trippy where things behind camera appear at front
+    //If point is NOT behind camera, draw point with gradient along p.z. Removing if(q.x>0) will make it trippy where things behind camera appear at front.
     //CAREFUL when calling Add function. Here we are not doing it in a loop so it's ok. But if you were inside a loop, then you shouldnt do this like 100 times, if you do have loop of 100 make sure to exit early and / or not call Add every iterations
     if(q.x>0)Add(q,mix(vec3(1.,.1,.2),vec3(.0,.1,1.),cos(p.z*.5)*.5+.5));
+  }
+  else if(UV.x>400&&UV.x<600){ //Amount / Density of particles
+    vec3 p=vec3(0); //Set p as 0,0,0 with no hash to avoid noise and keep sharp line look
+    float tubeLength=0.1;
+
+    // IMPORTANT UV SHIFT HERE: If you are not using hash noise to extrude then you must shift UV.x to start at 0,0,0
+
+    p.z=(UV.x-400)*tubeLength; //HERE we shift UV.x by -400 so that the second system starts at 0,0,0 otherwise it will be way off screen
+
+    //THAT WAS IMPORTANT YOU KNOW...
+
+    p.z-=100*tubeLength; //Move tube in middle, 100 is simply half of the amount of particles. Yes if you change 400 / 600 on line 105 you should change 100 to half of amount of particles: (600-400)/2
+    float radius=0.1;    //Tube radius
+    p.xy+=vec2(cos(uv.y*6.283)*radius,sin(uv.y*6.283)*radius);  //Push particles along a circle on XY to create tube. Here we using uv.y rather than UV.y as its range is 0->1 so it's simpler to make a full circle by mutiplying by 2*PI
+    p.x-=5;              //Shift tube before loop to offset loop rotation
+    for(float i = 0; i < 8; i++){ //Create bunch of tubes in loop
+        p.xy*=rotate2D(1.57/2);   //Rotate tube a bit each iter innit
+        ivec2 q=proj_point(p,cameraPosition,cameraDirection);   //Project point in 3d using camera or not, see function itself
+        //If point is NOT behind camera, draw point with gradient along p.z. Removing if(q.x>0) will make it trippy where things behind camera appear at front
+        //CAREFUL when calling Add function. You are now INSIDE a loop! You shouldnt do this like 100 times, if you do have loop of 100 make sure to exit early and / or not call Add every iterations
+        if(q.x>0)Add(q,mix(vec3(.0,.1,1.),vec3(.0,.0,.0),cos(p.z)*.5+.5));
+    }
   }
   vec3 s = Read(ivec2(UV))*.3; //Read back compute texture pixel, *.3 controls the brightness of the  whole thing as it's additive
 
