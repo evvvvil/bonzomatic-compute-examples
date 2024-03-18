@@ -84,20 +84,28 @@ void main(void){
   cameraTop=normalize(cross(cameraLeft,cameraForward));         //Camera top
   mat3 cameraDirection=mat3(cameraLeft,cameraTop,cameraForward);//Camera direction matrix
 
-  if(UV.x<400){                      //Amount / Density of particles
-    vec3 p=hash_v3()*vec3(3,3,6);    //Make a box of particles of scale 3,3,6
-    p-=vec3(1.5,1.5,3);              //Move box of particles in middle, so half of its scale 1.5,1.5,3
+  if(UV.x<500){                      //Amount / Density of particles
+    vec3 p=hash_v3()*vec3(3,3,10);    //Make a box of particles of scale 3,3,6
+    p-=vec3(1.5,1.5,5);              //Move box of particles in middle, so half of its scale 1.5,1.5,3
 
-    //Spherical attractor code:
-    vec3 attrPosition=vec3(0,sin(t*7)*5.,0)-p;          //Attractor position
-    float attrAmount=4;                                 //Attractor amount
-    float attrRadius=6;                                 //Attractor radius
+    //Spherical attractor (attracts particles towards sphere)
+    vec3 attrPosition=vec3(0,sin(t*7)*3.,3)-p;          //Attractor position
+    float attrAmount=-4;                                //Attractor amount (negative attracts inwards)
+    float attrRadius=5;                                 //Attractor radius
 		float attrForce=length(attrPosition)/attrRadius;    //Attractor force
 		attrForce=clamp(1-attrForce,0.,1.);                 //More attractor force shenanigans
 		attrForce=pow(attrForce, 8);                        //Pack ellipis into sphere more using 8, play with that number
 		p-=attrPosition*attrForce*attrAmount;               //Apply spherical attractor force to points position
 
-    ivec2 q=proj_point(p,cameraPosition,cameraDirection);       //Project point in 3d using camera or not, see function itself
+    //Spherical reverse attractor (pushes particles away from sphere)
+    attrPosition=vec3(0,cos(t*7)*3.,-3)-p;              //Attractor position
+    attrAmount=4;                                       //Attractor amount (positive pushes away)
+		attrForce=length(attrPosition)/attrRadius;          //Attractor force
+		attrForce=clamp(1-attrForce,0.,1.);                 //More attractor force shenanigans
+		attrForce=pow(attrForce, 8);                        //Pack ellipis into sphere more using 8, play with that number
+		p-=attrPosition*attrForce*attrAmount;               //Apply spherical attractor force to points position
+
+    ivec2 q=proj_point(p,cameraPosition,cameraDirection); //Project point in 3d using camera or not, see function itself
     //If point is NOT behind camera, draw point with gradient along p.z. Removing if(q.x>0) will make it trippy where things behind camera appear at front
     //CAREFUL when calling Add function. Here we are not doing it in a loop so it's ok. But if you were inside a loop, then you shouldnt do this like 100 times, if you do have loop of 100 make sure to exit early and / or not call Add every iterations
     if(q.x>0)Add(q,mix(vec3(1.,.1,.2),vec3(.0,.1,1.),cos(p.z*.3)*.5+.5));
