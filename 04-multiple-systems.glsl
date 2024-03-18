@@ -92,11 +92,12 @@ void main(void){
 
   if(UV.x<400){     //Amount / Density of particles
     vec3 p=hash_v3()*vec3(.1,.1,20); //Extrude using pure noise by scalling hash, 20 is used to extrude along z, xy
-    p.z-=10;                         //Move tube in middle, 10 is half of scale of noise in
+    p.z-=10;                         //Move tube in middle, 10 is half of scale of noise in line above
     float radius=1.+cos(p.z*.5)*.3;  //Tube radius with bulge deform using cosinus of p.z. You could use UV.x or uv.x as well, but p.z is based on UV.x and it's shifted at 0,0,0
     p.xy+=vec2(cos(uv.y*6.283)*radius,sin(uv.y*6.283)*radius);  //Push particles along a circle on XY to create tube. Here we using uv.y rather than UV.y as its range is 0->1 so it's simpler to make a full circle by mutiplying by 2*PI
     ivec2 q=proj_point(p,cameraPosition,cameraDirection);       //Project point in 3d using camera or not, see function itself
     //If point is NOT behind camera, draw point with gradient along p.z. Removing if(q.x>0) will make it trippy where things behind camera appear at front.
+    //CAREFUL when calling Add function. Here we are not doing it in a loop so it's ok. But if you were inside a loop, then you shouldnt do this like 100 times, if you do have loop of 100 make sure to exit early and / or not call Add every iterations
     if(q.x>0)Add(q,mix(vec3(1.,.1,.2),vec3(.0,.1,1.),cos(p.z*.5)*.5+.5));
   }
   else if(UV.x>400&&UV.x<600){ //Amount / Density of particles

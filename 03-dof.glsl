@@ -100,7 +100,7 @@ void main(void){
     p.z=UV.x*tubeLength; //We extrude system along z using UV rather than uv so that the calculation to move in middle is more simple
     //Yes you CAN extrude using uv instead of UV, so with a uv range 0->1 and with a different tube length range...
     //...But then to move the system in the middle, it would be more complex calculation than this:
-    p.z-=50*tubeLength; //Move tube in middle, 50 is simply half of the amount of particles. Yes if you change 400 on line 88 you should change 200 to half of it
+    p.z-=50*tubeLength; //Move tube in middle, 50 is simply half of the amount of particles. Yes if you change 100 on line 97 you should change 50 to half of it
     float radius=1.+cos(p.z*.5)*.3;  //Tube radius with bulge deform using cosinus of p.z. You could use UV.x or uv.x as well, but p.z is based on UV.x and it's shifted at 0,0,0
     p.xy+=vec2(cos(uv.y*6.283)*radius,sin(uv.y*6.283)*radius);  //Push particles along a circle on XY to create tube. Here we using uv.y rather than UV.y as its range is 0->1 so it's simpler to make a full circle by mutiplying by 2*PI
     ivec2 q=proj_point(p,cameraPosition,cameraDirection);       //Project point in 3d using camera or not, see function itself
